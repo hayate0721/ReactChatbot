@@ -3,12 +3,15 @@ import './App.css'
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 
+//const API_KEY = process.env.API_KEY;
+
 function App() {
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState([
     {
       message: "Hello, I am ChatGPT!",
-      semder: "ChatGPT"
+      semder: "ChatGPT",
+      direction: "incoming"
     }
   ])
 
@@ -28,7 +31,10 @@ function App() {
     setTyping(true);
 
     // process message to chatGPT (send it over and see the response)
+    await processMessageToChatGPT(newMessages);
   }
+
+
 
   return (
     <div className="App">
