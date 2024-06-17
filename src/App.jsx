@@ -3,7 +3,7 @@ import './App.css'
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 
-//const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY;
 
 function App() {
   const [typing, setTyping] = useState(false);
@@ -34,7 +34,49 @@ function App() {
     await processMessageToChatGPT(newMessages);
   }
 
+  async function processMessageToChatGPT(chatMessages){
+    // chatMessages {sender: "user" or "CHATGPT", message: "The message content here"}
+    // apiMessages {role: "user" or "assistant", content: "The message content here"}
 
+    let apiMessage = chatMessages.map((messageObject) => {
+      let role = "";
+      if(messageObhect.sender === "ChatGPT"){
+        role="assistant"
+      }else{
+        role="user"
+      }
+      return { role: role, content: messageObject.message}
+    });
+
+    // role: "user" -> a message fro mthe user, "assistant" -> a response from chatGPT
+    // "system" -> generally one initial message defining how we want chatgpt to talk
+
+    const systemMessage = {
+      role: "system",
+      content: "Explain all concepts like I am 10 years old."
+    }
+
+    const apiRequestBody = {
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        systemMessage,
+        ...apiMessages // [message1, message2, messgae3....]
+      ]
+    }
+
+    await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + API_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(apiRequestBody)
+    }).then((data) => {
+      return data.json();
+    }).then((data) => {
+      console.log(data);
+    })
+  }
 
   return (
     <div className="App">
