@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 
@@ -10,19 +10,19 @@ function App() {
   const [messages, setMessages] = useState([
     {
       message: "Hello, I am ChatGPT!",
-      semder: "ChatGPT",
+      sender: "ChatGPT", // corrected from 'semder' to 'sender'
       direction: "incoming"
     }
-  ])
+  ]);
 
   const handleSend = async (message) => {
     const newMessage = {
       message: message,
       sender: "user",
       direction: "outgoing"
-    }
+    };
 
-    const newMessages = [...messages, newMessage]; // all the old message + the new message
+    const newMessages = [...messages, newMessage]; // all the old messages + the new message
 
     // update our message state
     setMessages(newMessages);
@@ -34,33 +34,33 @@ function App() {
     await processMessageToChatGPT(newMessages);
   }
 
-  async function processMessageToChatGPT(chatMessages){
-    // chatMessages {sender: "user" or "CHATGPT", message: "The message content here"}
+  async function processMessageToChatGPT(chatMessages) {
+    // chatMessages {sender: "user" or "ChatGPT", message: "The message content here"}
     // apiMessages {role: "user" or "assistant", content: "The message content here"}
 
-    let apiMessage = chatMessages.map((messageObject) => {
+    let apiMessages = chatMessages.map((messageObject) => { // corrected from 'apiMessage' to 'apiMessages'
       let role = "";
-      if(messageObhect.sender === "ChatGPT"){
-        role="assistant"
-      }else{
-        role="user"
+      if (messageObject.sender === "ChatGPT") { // corrected from 'messageObhect' to 'messageObject'
+        role = "assistant";
+      } else {
+        role = "user";
       }
-      return { role: role, content: messageObject.message}
+      return { role: role, content: messageObject.message }
     });
 
-    // role: "user" -> a message fro mthe user, "assistant" -> a response from chatGPT
-    // "system" -> generally one initial message defining how we want chatgpt to talk
+    // role: "user" -> a message from the user, "assistant" -> a response from ChatGPT
+    // "system" -> generally one initial message defining how we want ChatGPT to talk
 
     const systemMessage = {
       role: "system",
-      content: "Explain all concepts like I am 10 years old."
+      content: "Talk like a cat."
     }
 
     const apiRequestBody = {
       "model": "gpt-3.5-turbo",
       "messages": [
         systemMessage,
-        ...apiMessages // [message1, message2, messgae3....]
+        ...apiMessages // corrected from 'apiMessage' to 'apiMessages'
       ]
     }
 
@@ -75,29 +75,38 @@ function App() {
       return data.json();
     }).then((data) => {
       console.log(data);
-    })
+      const responseMessage = {
+        message: data.choices[0].message.content,
+        sender: "ChatGPT",
+        direction: "incoming"
+      };
+
+      setMessages([...chatMessages, responseMessage]);
+      setTyping(false);
+    }).catch((error) => {
+      console.error("Error:", error);
+      setTyping(false);
+    });
   }
 
   return (
     <div className="App">
-      <div style={{ position: "relative", height: "800px", width: "700px"}}>
+      <div style={{ position: "relative", height: "800px", width: "700px" }}>
         <MainContainer>
           <ChatContainer>
             <MessageList
-            typingIndicator={typing? <TypingIndicator content = "ChatGPT is typing"/> : null}
+              typingIndicator={typing ? <TypingIndicator content="ChatGPT is typing" /> : null}
             >
               {messages.map((message, i) => {
                 return <Message key={i} model={message} />
               })}
             </MessageList>
-            <MessageInput placeholder='Type message here' onSend={handleSend}/>
+            <MessageInput placeholder='Type message here' onSend={handleSend} />
           </ChatContainer>
         </MainContainer>
-
       </div>
-
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
